@@ -5,5 +5,8 @@
   "license": "MIT",
   "devDependencies": {
     "@aws-sdk/client-s3": "^1.0.0-beta.3"
+  },
+  "dependencies": {
+    "debug": "^4.1.1"
   }
 }
