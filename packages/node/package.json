@@ -1,0 +1,9 @@
+{
+  "name": "@aws-sdk-debug/node",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^1.0.0-beta.3"
+  }
+}
