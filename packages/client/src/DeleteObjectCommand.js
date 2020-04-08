@@ -1,6 +1,10 @@
 const { DeleteObjectCommand: command } = require("@aws-sdk/client-s3");
+const debug = require("debug")("aws:sdk:js:s3:DeleteObjectCommand");
 
-const DeleteObjectCommand = (params) => new command(params);
+const DeleteObjectCommand = (params) => {
+  debug(params);
+  return new command(params);
+};
 
 module.exports = {
   DeleteObjectCommand,
