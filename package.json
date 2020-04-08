@@ -7,6 +7,17 @@
   "author": "Trivikram Kamat <trivikr.dev@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "lerna": "^3.20.2"
+    "husky": ">=4",
+    "lerna": "^3.20.2",
+    "lint-staged": ">=10",
+    "prettier": "2.0.4"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --write"
   }
 }
