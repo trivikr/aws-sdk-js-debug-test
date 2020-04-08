@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "git@github.com:trivikr/aws-sdk-js-debug-test.git",
   "author": "Trivikram Kamat <trivikr.dev@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "lerna": "^3.20.2"
+  }
 }
