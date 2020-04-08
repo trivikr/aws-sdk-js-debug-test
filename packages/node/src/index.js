@@ -1,5 +1,5 @@
 const { promisify } = require("util");
-const { S3 } = require("@aws-sdk/client-s3");
+const { S3Client, CreateBucketCommand } = require("@aws-sdk-debug/client");
 const sleep = promisify(setTimeout);
 
 const waitForBucketExists = async (client, params) => {
@@ -30,11 +30,11 @@ const waitForBucketExists = async (client, params) => {
   const Bucket = `test-bucket-${Math.ceil(Math.random() * 10 ** 10)}`;
   const Key = `test-object`;
 
-  const client = new S3({ region });
-  await client.createBucket({ Bucket });
-  await waitForBucketExists(client, { Bucket });
-  await client.putObject({ Bucket, Key, Body: "000000" });
-  await client.listObjects({ Bucket });
-  await client.deleteObject({ Bucket, Key });
-  await client.deleteBucket({ Bucket });
+  const client = S3Client({ region });
+  await client.send(CreateBucketCommand({ Bucket }));
+  // await waitForBucketExists(client, { Bucket });
+  // await client.putObject({ Bucket, Key, Body: "000000" });
+  // await client.listObjects({ Bucket });
+  // await client.deleteObject({ Bucket, Key });
+  // await client.deleteBucket({ Bucket });
 })();
