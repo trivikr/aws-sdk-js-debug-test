@@ -1,6 +1,15 @@
 const { promisify } = require("util");
-const { S3 } = require("@aws-sdk/client-s3");
 const sleep = promisify(setTimeout);
+
+const {
+  S3Client,
+  CreateBucketCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  ListObjectsCommand,
+  DeleteObjectCommand,
+  DeleteBucketCommand,
+} = require("@aws-sdk-debug/client");
 
 const waitForBucketExists = async (client, params) => {
   const maxAttempts = 20;
@@ -10,7 +19,7 @@ const waitForBucketExists = async (client, params) => {
   const checkForBucketExists = async () => {
     currentAttempt++;
     try {
-      await client.headBucket(params);
+      await client.send(HeadBucketCommand(params));
       return;
     } catch (e) {
       if (currentAttempt > maxAttempts) {
@@ -30,11 +39,11 @@ const waitForBucketExists = async (client, params) => {
   const Bucket = `test-bucket-${Math.ceil(Math.random() * 10 ** 10)}`;
   const Key = `test-object`;
 
-  const client = new S3({ region });
-  await client.createBucket({ Bucket });
+  const client = S3Client({ region });
+  await client.send(CreateBucketCommand({ Bucket }));
   await waitForBucketExists(client, { Bucket });
-  await client.putObject({ Bucket, Key, Body: "000000" });
-  await client.listObjects({ Bucket });
-  await client.deleteObject({ Bucket, Key });
-  await client.deleteBucket({ Bucket });
+  await client.send(PutObjectCommand({ Bucket, Key, Body: "000000" }));
+  await client.send(ListObjectsCommand({ Bucket }));
+  await client.send(DeleteObjectCommand({ Bucket, Key }));
+  await client.send(DeleteBucketCommand({ Bucket }));
 })();
