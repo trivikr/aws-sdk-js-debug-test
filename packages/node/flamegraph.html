@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>flamebearer</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<style>
+    html, body { height: 100%; }
+    body { font: 16px "Helvetica Neue", sans-serif; margin: 0; }
+    body.hover { background: #cfc; }
+    h1 { font-size: 30px; margin: 30px 30px 15px; }
+    h1 a { color: black; text-decoration: none; }
+    h1 a:hover { text-decoration: underline; }
+    #fire-icon { fill: #f53; width: 26px; height: 26px; vertical-align: -1px; }
+    #intro { margin: 0 30px; }
+    code { font-size: 13px; color: #444; }
+    code span { color: #aaa; }
+    #canvas { width: 100%; }
+    #controls { display: none; }
+    #search { margin-right: 10px; }
+    #highlight { position: absolute; pointer-events: none; background: #ffffff40; }
+    .loaded #intro { display: none; }
+    .loaded #header { display: flex; align-items: center; flex-flow: row wrap; padding: 7px 10px; }
+    .loaded h1 { font-size: 22px; margin: 0 auto 0 0; flex-shrink: 0; }
+    .loaded #fire-icon { width: 20px; height: 20px; }
+    .loaded #controls { display: block; flex-shrink: 0; }
+    #tooltip { position: absolute; pointer-events: none; background: #ffffff; white-space: nowrap; box-shadow: 1px 2px 4px 0px rgba(0,0,0,0.3); border-radius: 2px; padding: 3px 5px; font: 12px Tahoma, sans-serif; display: none; }
+    #tooltip .path { color: #888; font-size: 11px; }
+    #tooltip .time { color: #4a4; }
+</style>
+</head>
+<body>
+
+<div id="header">
+    <h1><svg id="fire-icon" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 15 15" style="enable-background:new 0 0 15 15;" xml:space="preserve"><path d="M7.5,0.5L5,4.5l-1.5-2 C2.9452,3.4753,0.8036,5.7924,0.8036,8.3036C0.8036,12.002,3.8017,15,7.5,15s6.6964-2.998,6.6964-6.6964 c0-2.5112-2.1416-4.8283-2.6964-5.8036l-1.5,2L7.5,0.5z M7.5,7c0,0,2.5,2.5618,2.5,4.5c0,0.8371-0.8259,2-2.5,2S5,12.3371,5,11.5 C5,9.6283,7.5,7,7.5,7z"/></svg> <a href="https://github.com/mapbox/flamebearer">flamebearer</a></h1>
+    <div id="controls">
+        <input id="search" placeholder="Search..." />
+        <button id="reset">Reset view</button>
+    </div>
+</div>
+<div id="highlight"></div>
+<div id="tooltip"></div>
+<div id="intro"><!--  --></div>
+<canvas id="canvas" height="0"></canvas>
+
+<!--  -->
+<script>'use strict';
+
+const introEl = document.getElementById('intro');
+const searchEl = document.getElementById('search');
+const highlightEl = document.getElementById('highlight');
+const tooltipEl = document.getElementById('tooltip');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let names, levels, numTicks;
+
+names = ["(unknown)","~(anonymous) internal/bootstrap/loaders.js:1:1","~<static_fields_initializer> internal/bootstrap/loaders.js:165:3","(bytecode) ~Abort.ExtraWide","~(anonymous) internal/bootstrap/loaders.js:165:38","~NativeModule internal/bootstrap/loaders.js:167:14","(unknown)","~(anonymous) internal/bootstrap/node.js:1:1","~setupPrepareStackTrace internal/bootstrap/node.js:251:32","~nativeModuleRequire internal/bootstrap/loaders.js:299:29","~compileForInternalLoader internal/bootstrap/loaders.js:266:27","~(anonymous) internal/errors.js:1:1","~E internal/errors.js:320:11","~(anonymous) internal/url.js:1:1","~(anonymous) internal/main/run_main_module.js:1:1","~prepareMainThreadExecution internal/bootstrap/pre_execution.js:14:36","~patchProcessObject internal/bootstrap/pre_execution.js:72:28","~resolve path.js:973:10","~normalizeString path.js:52:25","~setupWarningHandler internal/bootstrap/pre_execution.js:121:29","~initializeCJSLoader internal/bootstrap/pre_execution.js:395:29","~(anonymous) internal/modules/cjs/loader.js:1:1","~(anonymous) internal/source_map/source_map_cache.js:1:1","~(anonymous) fs.js:1:1","~Module._initPaths internal/modules/cjs/loader.js:1253:29","~executeUserEntryPoint internal/modules/run_main.js:67:31","~resolveMainPath internal/modules/run_main.js:8:25","~Module._findPath internal/modules/cjs/loader.js:640:28","(C++) __kernelrpc_vm_remap","~Module._load internal/modules/cjs/loader.js:845:24","~Module.load internal/modules/cjs/loader.js:990:33","~Module._extensions..js internal/modules/cjs/loader.js:1167:37","~Module._compile internal/modules/cjs/loader.js:1112:37","~(anonymous) ./packages/node/index.js:1:1","~require internal/modules/cjs/helpers.js:76:31","~Module.require internal/modules/cjs/loader.js:1036:36","~Module._resolveFilename internal/modules/cjs/loader.js:916:35","~resolveExports internal/modules/cjs/loader.js:541:24","~(anonymous) internal/per_context/primordials.js:23:10","~(anonymous) ./packages/client/src/index.js:1:1","~(anonymous) ./packages/client/src/S3Client.js:1:1","~readPackageScope internal/modules/cjs/loader.js:273:26","~readPackage internal/modules/cjs/loader.js:239:21","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/S3Client.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/runtimeConfig.js:1:1","~(anonymous) ./node_modules/@aws-sdk/credential-provider-node/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/credential-provider-imds/build/index.js:1:1","~readFileSync fs.js:356:22","~tryCreateBuffer fs.js:329:25","~allocUnsafe buffer.js:365:42","~allocate buffer.js:390:18","~createUnsafeBuffer buffer.js:134:28","~FastBuffer internal/buffer.js:944:1","(C++) node::NodeArrayBufferAllocator::Allocate","~(anonymous) ./node_modules/@aws-sdk/credential-provider-imds/build/fromContainerMetadata.js:1:1","~createPool buffer.js:143:20","(C++) _tiny_malloc_should_clear","~(anonymous) ./node_modules/@aws-sdk/credential-provider-imds/build/remoteProvider/httpGet.js:1:1","~loadNativeModule internal/modules/cjs/helpers.js:22:26","~compileForPublicLoader internal/bootstrap/loaders.js:213:25","~(anonymous) http.js:1:1","~(anonymous) _http_agent.js:1:1","~Agent _http_agent.js:63:15","~tryPackage internal/modules/cjs/loader.js:301:20","~tryFile internal/modules/cjs/loader.js:347:17","~toRealPath internal/modules/cjs/loader.js:355:20","~realpathSync fs.js:1465:22","~encodeRealpathResult fs.js:1436:30","~(anonymous) ./node_modules/@aws-sdk/eventstream-serde-node/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/eventstream-serde-node/build/provider.js:1:1","~(anonymous) ./node_modules/@aws-sdk/eventstream-serde-node/build/EventStreamMarshaller.js:1:1","~(anonymous) ./node_modules/@aws-sdk/eventstream-marshaller/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/eventstream-marshaller/build/EventStreamMarshaller.js:1:1","~(anonymous) ./node_modules/@aws-sdk/eventstream-marshaller/build/splitMessage.js:1:1","~(anonymous) ./node_modules/@aws-sdk/hash-stream-node/build/index.js:1:1","~tryExtensions internal/modules/cjs/loader.js:362:23","(C++) __malloc_initialize","~(anonymous) ./node_modules/@aws-sdk/hash-node/build/index.js:1:1","~wrapSafe internal/modules/cjs/loader.js:1056:18","~(anonymous) ./node_modules/@aws-sdk/node-http-handler/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/node-http-handler/build/node-http-handler.js:1:1","~(anonymous) https.js:1:1","~(anonymous) tls.js:1:1","~(anonymous) _tls_wrap.js:1:1","~(anonymous) internal/js_stream_socket.js:1:1","(C++) _small_malloc_should_clear","~(anonymous) ./node_modules/@aws-sdk/querystring-builder/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/util-uri-escape/build/index.js:1:1","~tryReadSync fs.js:344:21","~readSync fs.js:499:18","~hidden internal/errors.js:277:25","~(anonymous) ./node_modules/@aws-sdk/protocol-http/build/index.js:1:1","~openSync fs.js:448:18","~(anonymous) ./node_modules/@aws-sdk/node-http-handler/build/node-http2-handler.js:1:1","~(anonymous) http2.js:1:1","~(anonymous) internal/http2/core.js:1:1","~(anonymous) internal/http2/compat.js:1:1","~(anonymous) internal/http2/util.js:1:1","(C++) _malloc_zone_from_ptr","~(anonymous) ./node_modules/@aws-sdk/config-resolver/build/index.js:1:1","~nextPart fs.js:1461:31","~(anonymous) ./node_modules/@aws-sdk/middleware-bucket-endpoint/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/middleware-host-header/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/middleware-retry/build/index.js:1:1","~isFileType fs.js:173:20","~applyExports internal/modules/cjs/loader.js:489:22","~(anonymous) ./node_modules/@aws-sdk/middleware-signing/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/middleware-signing/build/configurations.js:1:1","~readPackageExports internal/modules/cjs/loader.js:296:28","~(anonymous) ./node_modules/@aws-sdk/signature-v4/dist/cjs/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/signature-v4/dist/cjs/credentialDerivation.js:1:1","~(anonymous) ./node_modules/@aws-sdk/signature-v4/dist/cjs/SignatureV4.js:1:1","~Module internal/modules/cjs/loader.js:150:16","~stat internal/modules/cjs/loader.js:133:14","~(anonymous) ./node_modules/@aws-sdk/smithy-client/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/S3.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/AbortMultipartUploadCommand.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/protocols/Aws_restXml.js:1:1","~readPackageMain internal/modules/cjs/loader.js:291:25","~(anonymous) ./node_modules/@aws-sdk/xml-builder/build/index.js:1:1","~(anonymous) ./node_modules/@aws-sdk/xml-builder/build/XmlText.js:1:1","~maybeCacheSourceMap internal/source_map/source_map_cache.js:42:29","~(anonymous) ./node_modules/fast-xml-parser/src/parser.js:1:1","~(anonymous) ./node_modules/fast-xml-parser/src/node2json.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/CreateBucketCommand.js:1:1","~findLongestRegisteredExtension internal/modules/cjs/loader.js:375:40","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/DeleteObjectTaggingCommand.js:1:1","(lib) /usr/lib/libc++abi.dylib","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/DeleteObjectsCommand.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/GetBucketNotificationConfigurationCommand.js:1:1","(lib) /usr/lib/system/libsystem_platform.dylib","~Module._nodeModulePaths internal/modules/cjs/loader.js:764:37","~Module._resolveLookupPaths internal/modules/cjs/loader.js:799:38","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/GetObjectLegalHoldCommand.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/ListObjectVersionsCommand.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/PutBucketAclCommand.js:1:1","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/UploadPartCopyCommand.js:1:1","~updateChildren internal/modules/cjs/loader.js:144:24","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/models/index.js:1:1","require internal/modules/cjs/helpers.js:76:31","~(anonymous) ./packages/client/node_modules/debug/src/index.js:1:1","~(anonymous) ./packages/client/node_modules/debug/src/node.js:1:1","~(anonymous) tty.js:1:1","~(anonymous) internal/tty.js:1:1","~(anonymous) ./node_modules/supports-color/index.js:1:1","~toString buffer.js:761:46","~(anonymous) ./packages/node/index.js:36:2","~S3Client ./packages/client/src/S3Client.js:4:18","~S3Client ./node_modules/@aws-sdk/client-s3/dist/cjs/S3Client.js:19:16","~resolveAwsAuthConfig ./node_modules/@aws-sdk/middleware-signing/build/configurations.js:5:30","~defaultProvider ./node_modules/@aws-sdk/credential-provider-node/build/index.js:37:25","~memoize ./node_modules/@aws-sdk/property-provider/build/memoize.js:3:17","~(anonymous) ./node_modules/@aws-sdk/property-provider/build/chain.js:19:21","~promiseRejectHandler internal/process/promises.js:74:30","~unhandledRejection internal/process/promises.js:102:28","~(anonymous) ./node_modules/@aws-sdk/property-provider/build/chain.js:23:46","~(anonymous) ./node_modules/@aws-sdk/credential-provider-env/build/index.js:14:21","~ProviderError ./node_modules/@aws-sdk/property-provider/build/ProviderError.js:15:27","~signRequest ./node_modules/@aws-sdk/signature-v4/dist/cjs/SignatureV4.js:104:22","~getCanonicalHeaders ./node_modules/@aws-sdk/signature-v4/dist/cjs/getCanonicalHeaders.js:7:29","~fulfilled ./node_modules/tslib/tslib.js:110:31","~(anonymous) ./node_modules/tslib/tslib.js:120:44","~step ./node_modules/tslib/tslib.js:121:22","~(anonymous) ./node_modules/@aws-sdk/middleware-signing/build/middleware.js:17:59","~(anonymous) ./node_modules/@aws-sdk/middleware-serde/build/deserializerMiddleware.js:5:22","~__awaiter ./node_modules/tslib/tslib.js:107:26","~(anonymous) ./node_modules/tslib/tslib.js:109:50","~(anonymous) ./node_modules/@aws-sdk/middleware-serde/build/deserializerMiddleware.js:5:82","~(anonymous) ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/CreateBucketCommand.js:24:30","~handle ./node_modules/@aws-sdk/node-http-handler/build/node-http-handler.js:25:11","~(anonymous) ./node_modules/@aws-sdk/node-http-handler/build/node-http-handler.js:26:28","~buildQueryString ./node_modules/@aws-sdk/querystring-builder/build/index.js:5:26","~request https.js:281:17","~ClientRequest _http_client.js:85:23","~_storeHeader _http_outgoing.js:345:22","~_send _http_outgoing.js:282:49","~_writeRaw _http_outgoing.js:315:19","~addRequest _http_agent.js:177:49","~calculateServerName _http_agent.js:270:29","~isIP internal/net.js:37:14","~isIPv6 internal/net.js:33:16","~createSocket _http_agent.js:235:53","~createConnection https.js:98:26","~connect _tls_wrap.js:1527:35","~createSecureContext _tls_common.js:94:59","~processTicksAndRejections internal/process/task_queues.js:69:35","~onSocketNT _http_client.js:738:20","~tickOnSocket _http_client.js:674:22","~emit events.js:261:44","~onceWrapper events.js:412:21","~onSocket _http_client.js:767:20","~callSocketMethod _http_client.js:759:28","~(anonymous) _http_client.js:315:36","~_flush _http_outgoing.js:825:51","~_flushOutput _http_outgoing.js:842:63","~Writable.write _stream_writable.js:289:36","~writeOrBuffer _stream_writable.js:393:23","~onStreamRead internal/stream_base_commons.js:163:22","~Readable.push _stream_readable.js:208:35","~readableAddChunk _stream_readable.js:217:26","~addChunk _stream_readable.js:291:18","~socketOnData _http_client.js:469:22","(C++) node::","~parserOnHeadersComplete _http_common.js:74:33","~parserOnIncomingClient _http_client.js:539:32","~(anonymous) ./node_modules/@aws-sdk/node-http-handler/build/write-request-body.js:7:36","~writeBody ./node_modules/@aws-sdk/node-http-handler/build/write-request-body.js:16:19","~end _http_outgoing.js:733:45","~Writable.uncork _stream_writable.js:326:37","~clearBuffer _stream_writable.js:535:21","~doWrite _stream_writable.js:431:17","~Socket._writev net.js:786:36","~Socket._writeGeneric net.js:754:42","~writevGeneric internal/stream_base_commons.js:116:23","~afterWriteDispatched internal/stream_base_commons.js:149:30","(C++) node::task_queue::RunMicrotasks","~PutObjectCommand ./packages/client/src/PutObjectCommand.js:4:26","~PutObjectCommand ./node_modules/@aws-sdk/client-s3/dist/cjs/commands/PutObjectCommand.js:11:16","~Command ./node_modules/@aws-sdk/smithy-client/build/command.js:5:21","~(anonymous) ./node_modules/@aws-sdk/config-resolver/build/EndpointsConfig.js:24:59","~exports.parseUrl ./node_modules/@aws-sdk/url-parser-node/build/index.js:5:20","~urlParse url.js:150:18","~parse url.js:158:37","~format url.js:575:39","~sign ./node_modules/@aws-sdk/signature-v4/dist/cjs/SignatureV4.js:62:15","~get net.js:555:16","~(anonymous) ./node_modules/@aws-sdk/middleware-serde/build/serializerMiddleware.js:5:82","~(anonymous) ./node_modules/@aws-sdk/middleware-user-agent/build/middleware.js:6:46","~(anonymous) ./node_modules/@aws-sdk/middleware-content-length/build/index.js:8:46","~(anonymous) ./node_modules/@aws-sdk/middleware-content-length/build/index.js:11:51","~(anonymous) ./node_modules/@aws-sdk/middleware-expect-continue/build/index.js:7:46","~(anonymous) ./node_modules/@aws-sdk/middleware-expect-continue/build/index.js:9:51","~(anonymous) ./node_modules/@aws-sdk/middleware-bucket-endpoint/build/bucketEndpointMiddleware.js:8:46","~(anonymous) ./node_modules/@aws-sdk/middleware-bucket-endpoint/build/bucketEndpointMiddleware.js:10:51","~(anonymous) ./node_modules/@aws-sdk/middleware-host-header/build/index.js:9:94","~(anonymous) ./node_modules/@aws-sdk/middleware-host-header/build/index.js:11:47","~(anonymous) ./node_modules/@aws-sdk/middleware-retry/build/retryMiddleware.js:6:46","~(anonymous) ./node_modules/@aws-sdk/middleware-retry/build/retryMiddleware.js:7:51","~ExponentialBackOffStrategy.retry ./node_modules/@aws-sdk/middleware-retry/build/defaultStrategy.js:19:59"];
+levels = [[0,1,0,0,81,6],[0,1,1,0,1,3,0,2,7,0,64,14,0,1,156,0,5,161,0,6,186,0,2,198],[0,1,2,0,1,159,0,1,8,0,1,9,0,4,15,0,60,25,0,1,157,0,5,162,0,2,187,0,4,216,0,1,199,0,1,226],[0,1,3,0,1,160,0,1,9,0,1,10,0,1,16,0,1,19,0,2,20,0,1,26,0,59,29,0,1,158,0,5,163,0,2,188,0,1,3,0,3,161,0,1,200,0,1,3],[0,1,4,0,1,3,0,1,10,0,1,13,0,1,17,0,1,3,0,1,9,0,1,24,0,1,27,0,59,30,0,1,3,0,5,164,0,2,189,0,1,147,0,1,3,0,2,162,0,1,201],[0,1,5,0,1,3,0,1,11,0,1,9,0,1,18,1,1,10,0,1,17,0,1,3,0,59,31,0,1,3,0,5,165,0,2,190,0,1,217,0,1,227,0,2,163,0,1,189],[0,1,3,0,1,3,0,1,12,0,1,3,0,1,3,1,1,21,0,1,3,0,1,3,0,59,32,1,5,166,0,2,191,0,1,218,0,1,228,0,1,164,0,1,220,0,1,202],[0,1,3,1,1,3,3,1,9,0,1,3,0,1,28,0,59,33,1,5,3,0,2,192,0,1,219,0,1,229,0,1,225,0,1,221,0,1,203],[2,1,3,3,1,10,2,56,34,0,3,147,1,5,167,0,2,193,0,1,3,0,1,166,0,1,159,0,1,222,0,1,204],[6,1,22,2,56,35,0,3,148,1,5,3,0,2,194,1,1,3,0,1,3,0,1,223,0,1,205],[6,1,9,2,56,29,0,3,149,1,5,168,0,1,3,0,1,195,1,1,167,1,1,224,0,1,189],[6,1,10,2,55,30,0,1,36,0,2,3,0,1,150,1,5,169,1,1,196,1,1,162,1,1,3,0,1,206],[6,1,23,2,55,31,0,1,27,0,2,3,0,1,151,1,5,170,1,1,197,1,1,163,2,1,207],[6,1,3,2,55,32,0,1,37,1,1,3,0,1,152,1,5,3,1,1,3,1,1,230,2,1,208],[6,1,3,2,55,39,0,1,38,2,1,153,1,5,171,1,1,3,1,1,231,2,1,209],[9,55,34,0,1,3,2,1,3,1,1,172,0,4,173,3,1,166,2,1,210],[9,55,35,0,1,3,2,1,3,1,1,3,0,4,174,3,1,3,2,1,211],[9,55,29,0,1,28,2,1,154,2,1,175,0,3,178,3,1,167,2,1,212],[9,55,30,3,1,155,2,1,176,0,1,179,0,2,182,3,1,162,2,1,213],[9,55,31,3,1,3,2,1,177,0,1,180,0,2,183,3,1,163,2,1,214],[9,55,32,3,1,3,2,1,3,0,1,181,0,2,184,3,1,232,2,1,215],[9,55,40,6,1,3,0,1,3,0,2,185,3,1,233,2,1,3],[9,51,34,0,4,140,7,1,3,0,2,3,3,1,166,2,1,3],[9,51,35,0,4,30,7,1,28,1,1,3,3,1,3],[9,51,29,0,4,31,13,1,167],[9,51,30,0,3,32,0,1,48,13,1,162],[9,51,31,0,3,141,0,1,49,13,1,163],[9,50,32,0,1,41,0,3,140,0,1,50,13,1,234],[9,50,43,0,1,42,0,3,30,0,1,51,13,1,235],[9,50,34,0,1,3,0,3,31,0,1,3,13,1,166],[9,50,35,0,1,3,0,3,32,14,1,3],[9,50,29,1,3,142,14,1,167],[9,50,30,1,3,140,14,1,162],[9,50,31,1,2,30,0,1,60,14,1,163],[9,50,32,1,2,31,0,1,10,14,1,236],[9,27,44,0,22,116,0,1,139,1,1,32,0,1,48,0,1,143,14,1,237],[9,27,34,0,22,34,0,1,3,1,1,145,0,1,3,0,1,9,14,1,166],[9,27,35,0,22,35,0,1,3,1,1,140,1,1,10,14,1,3],[9,27,29,0,22,29,2,1,30,1,1,144,14,1,167],[9,23,30,0,4,36,0,20,30,0,2,36,2,1,31,1,1,3,14,1,162],[9,23,31,0,4,27,0,17,31,0,1,126,0,2,132,0,1,27,0,1,133,2,1,48,1,1,3,14,1,163],[9,23,32,0,2,37,0,1,64,0,1,114,0,14,32,0,3,48,0,1,3,0,2,3,0,1,76,0,1,3,2,1,146,16,1,238],[9,14,45,0,1,100,0,2,102,0,1,103,0,1,104,0,3,107,0,1,115,0,2,106,0,1,65,0,1,3,0,5,117,0,1,122,0,1,125,0,1,127,0,1,129,0,1,130,0,1,134,0,1,135,0,1,136,0,1,137,0,1,49,0,2,89,1,2,3,0,1,65,3,1,3,16,1,239],[9,14,34,0,1,34,0,2,34,0,1,34,0,1,34,0,3,34,0,1,34,0,1,17,0,1,109,0,1,66,0,1,3,0,5,34,0,1,3,0,1,34,0,1,34,0,1,34,0,1,34,0,1,34,0,1,34,0,1,34,0,1,34,0,1,50,0,2,90,2,1,131,0,1,66,20,1,166],[9,14,35,0,1,35,0,2,35,0,1,35,0,1,35,0,3,35,0,1,35,0,1,3,0,1,42,0,1,67,1,5,35,0,1,3,0,1,35,0,1,35,0,1,35,0,1,35,0,1,35,0,1,35,0,1,35,0,1,35,0,1,51,0,1,3,0,1,91,3,1,67,20,1,3],[9,14,29,0,1,29,0,2,29,0,1,29,0,1,29,0,3,29,0,1,29,1,1,3,0,1,105,1,5,29,1,1,29,0,1,29,0,1,29,0,1,29,0,1,29,0,1,29,0,1,29,0,1,29,0,1,3,1,1,3,3,1,3,20,1,167],[9,13,30,0,1,36,0,1,36,0,1,30,0,1,36,0,1,36,0,1,30,0,3,30,0,1,30,2,1,3,1,5,30,1,1,36,0,1,36,0,1,36,0,1,36,0,1,3,0,1,36,0,1,36,0,1,138,6,1,3,20,1,162],[9,13,31,0,1,27,0,1,27,0,1,31,0,1,27,0,1,27,0,1,31,0,3,31,0,1,31,4,5,31,1,1,27,0,1,27,0,1,27,0,1,27,0,1,131,0,1,133,0,1,3,0,1,3,27,1,163],[9,12,32,0,1,48,0,1,64,0,1,76,0,1,41,0,1,3,0,1,64,0,1,48,0,3,32,0,1,48,4,4,32,0,1,41,1,1,37,0,1,3,0,1,37,0,1,3,1,1,3,29,1,162],[9,4,46,0,1,69,0,1,75,0,1,78,0,5,80,0,1,89,0,1,65,0,1,65,0,1,42,1,1,3,0,1,3,0,3,108,0,1,89,4,4,118,0,1,42,1,1,106,0,1,128,0,1,106,0,1,131,31,1,163],[9,4,34,0,1,34,0,1,34,0,1,34,0,5,34,0,1,90,0,1,66,0,1,66,0,1,17,3,3,34,0,1,90,4,4,34,0,1,17,1,1,109,1,1,109,32,1,3],[9,4,35,0,1,35,0,1,35,0,1,35,0,5,35,0,1,3,0,1,67,0,1,67,0,1,3,3,3,35,0,1,91,4,4,35,0,1,18,1,1,42,1,1,42],[9,4,29,0,1,29,0,1,29,0,1,29,0,5,29,1,1,68,0,1,101,4,3,29,0,1,3,4,4,29,0,1,3,1,1,3,1,1,3],[9,3,30,0,1,36,0,1,30,0,1,36,0,1,30,0,5,30,1,1,3,0,1,3,4,2,30,0,1,36,5,3,30,0,1,36,2,1,3,1,1,3],[9,3,31,0,1,27,0,1,31,0,1,27,0,1,31,0,5,31,7,2,31,0,1,27,5,3,31,0,1,27],[9,3,32,0,1,3,0,1,32,0,1,76,0,1,32,0,5,32,7,2,32,0,1,37,5,3,32,0,1,64],[9,3,47,1,1,70,0,1,65,0,1,79,0,4,81,0,1,94,7,2,110,0,1,106,5,2,120,0,1,123,0,1,119],[9,3,34,1,1,34,0,1,66,0,1,3,0,4,34,0,1,34,7,2,34,0,1,109,5,2,34,0,1,34,0,1,42],[9,3,35,1,1,35,0,1,67,1,4,35,0,1,35,7,2,35,0,1,42,5,2,35,0,1,35,0,1,17],[9,3,29,1,1,29,0,1,3,1,4,29,0,1,29,7,2,29,0,1,3,5,2,29,0,1,29,0,1,3],[9,3,30,1,1,30,0,1,77,1,3,30,0,1,59,0,1,59,7,2,30,0,1,3,5,2,30,0,1,30],[9,3,31,1,1,31,2,3,31,0,1,60,0,1,60,7,2,31,6,2,31,0,1,31],[9,2,32,0,1,48,1,1,32,2,2,32,0,1,48,0,1,10,0,1,10,7,2,32,6,1,32,0,1,48,0,1,32],[9,2,55,0,1,49,1,1,71,2,1,87,0,1,92,0,1,49,0,1,82,0,1,95,7,1,111,0,1,112,6,1,121,0,1,49,0,1,124],[9,2,34,0,1,50,1,1,34,2,1,34,0,1,34,0,1,50,0,1,9,0,1,9,7,1,3,0,1,34,6,1,34,0,1,50,0,1,34],[9,2,35,0,1,51,1,1,35,2,1,35,0,1,35,0,1,51,0,1,10,0,1,10,7,1,3,0,1,35,6,1,35,0,1,51,0,1,35],[9,2,29,0,1,52,1,1,29,2,1,29,0,1,29,0,1,56,0,1,83,0,1,96,8,1,29,6,1,29,0,1,52,0,1,29],[9,2,30,0,1,53,1,1,30,2,1,30,0,1,30,0,1,52,0,1,9,0,1,9,8,1,113,6,1,30,0,1,53,0,1,30],[9,2,31,0,1,3,1,1,31,2,1,31,0,1,31,0,1,53,0,1,10,0,1,10,8,1,3,6,1,31,0,1,3,0,1,31],[9,1,32,0,1,48,0,1,3,1,1,32,2,1,32,0,1,48,0,1,3,0,1,84,0,1,97,15,1,32,0,1,3,0,1,41],[9,1,58,0,1,49,0,1,54,1,1,72,2,1,88,0,1,93,0,1,3,0,1,9,0,1,9,15,1,122,1,1,42],[9,1,34,0,1,50,2,1,34,2,1,34,0,1,91,0,1,86,0,1,10,0,1,10,15,1,3,1,1,17],[9,1,35,0,1,51,2,1,35,2,1,35,0,1,3,1,1,85,0,1,98,15,1,6,1,1,18],[9,1,29,0,1,56,2,1,29,2,1,29,2,1,3,0,1,3,17,1,3],[9,1,59,0,1,52,2,1,30,2,1,30,2,1,3,0,1,99],[9,1,60,0,1,53,2,1,31,2,1,31],[9,1,10,0,1,3,2,1,32,2,1,48],[9,1,61,0,1,3,2,1,73,2,1,89],[9,1,9,0,1,57,2,1,34,2,1,90],[9,1,10,3,1,35,2,1,91],[9,1,62,3,1,29,2,1,3],[9,1,63,3,1,30],[9,1,3,3,1,31],[13,1,32],[13,1,74],[13,1,34],[13,1,35],[13,1,29],[13,1,30],[13,1,31],[13,1,48],[13,1,49],[13,1,50],[13,1,51],[13,1,52],[13,1,53],[13,1,3],[13,1,3],[13,1,3]];
+numTicks = 82;
+
+let rangeMin = 0;
+let rangeMax = 1;
+let topLevel = 0;
+let query = '';
+let graphWidth, pxPerTick;
+
+const pxPerLevel = 18;
+const collapseThreshold = 5;
+const hideThreshold = 0.5;
+const labelThreshold = 20;
+
+highlightEl.style.height = pxPerLevel + 'px';
+
+if (levels) {
+    init();
+}
+
+function init() {
+    document.body.classList.add('loaded');
+
+    // delta-decode bar positions
+    for (const level of levels) {
+        let prev = 0;
+        for (let i = 0; i < level.length; i += 3) {
+            level[i] += prev;
+            prev = level[i] + level[i + 1];
+        }
+    }
+
+    updateFromHash();
+    render();
+}
+
+window.onhashchange = () => {
+    updateFromHash();
+    render();
+};
+canvas.onclick = (e) => {
+    const {i, j} = xyToBar(e.offsetX, e.offsetY);
+    if (j === -1) return;
+    window.location.hash = [i, j].join(',');
+    removeHover();
+};
+document.getElementById('reset').onclick = () => {
+    searchEl.value = query = '';
+    window.location.hash = '';
+    render();
+};
+window.onresize = render;
+
+searchEl.oninput = (e) => {
+    query = e.target.value;
+    render();
+};
+
+function updateFromHash() {
+    const [i, j] = window.location.hash.substr(1).split(',').map(Number);
+
+    if (!isNaN(i) && !isNaN(j)) {
+        topLevel = i;
+        rangeMin = levels[i][j] / numTicks;
+        rangeMax = (levels[i][j] + levels[i][j + 1]) / numTicks;
+    } else {
+        topLevel = 0;
+        rangeMin = 0;
+        rangeMax = 1;
+    }
+}
+
+function tickToX(i) {
+    return (i - numTicks * rangeMin) * pxPerTick;
+}
+
+function render() {
+    if (!levels) return;
+
+    graphWidth = canvas.width = canvas.clientWidth;
+    canvas.height = pxPerLevel * (levels.length - topLevel);
+    canvas.style.height = canvas.height + 'px';
+
+    if (devicePixelRatio > 1) {
+        canvas.width *= 2;
+        canvas.height *= 2;
+        ctx.scale(2, 2);
+    }
+
+    pxPerTick = graphWidth / numTicks / (rangeMax - rangeMin);
+
+    ctx.textBaseline = 'middle';
+    ctx.font = '10px Tahoma, sans-serif';
+    ctx.strokeStyle = 'white';
+
+    for (let i = 0; i < levels.length - topLevel; i++) {
+        const level = levels[topLevel + i];
+
+        for (let j = 0; j < level.length; j += 3) {
+            const barIndex = level[j];
+            const x = tickToX(barIndex);
+            const y = i * pxPerLevel;
+            let numBarTicks = level[j + 1];
+
+            const inQuery = query && (names[level[j + 2]].indexOf(query) >= 0) || false;
+
+            // merge very small blocks into big "collapsed" ones for performance
+            const collapsed = numBarTicks * pxPerTick <= collapseThreshold;
+            if (collapsed) {
+                while (
+                    j < level.length - 3 &&
+                    barIndex + numBarTicks === level[j + 3] &&
+                    level[j + 4] * pxPerTick <= collapseThreshold &&
+                    (inQuery === (query && (names[level[j + 5]].indexOf(query) >= 0) || false))
+                ) {
+                    j += 3;
+                    numBarTicks += level[j + 1];
+                }
+            }
+
+            const sw = numBarTicks * pxPerTick - (collapsed ? 0 : 0.5);
+            const sh = pxPerLevel - 0.5;
+
+            if (x < -1 || x + sw > graphWidth + 1 || sw < hideThreshold) continue;
+
+            ctx.beginPath();
+            ctx.rect(x, y, sw, sh);
+
+            const ratio = numBarTicks / numTicks;
+
+            if (!collapsed) {
+                ctx.stroke();
+                const intensity = Math.min(1, ratio * Math.pow(1.16, i) / (rangeMax - rangeMin));
+                const h = 50 - 50 * intensity;
+                const l = 65 + 7 * intensity;
+                ctx.fillStyle = inQuery ? 'lightgreen' : `hsl(${h}, 100%, ${l}%)`;
+            } else {
+                ctx.fillStyle = inQuery ? 'lightgreen' : '#eee';
+            }
+            ctx.fill();
+
+            if (!collapsed && sw >= labelThreshold) {
+
+                const percent = Math.round(10000 * ratio) / 100;
+                const name = `${names[level[j + 2]]} (${percent}%, ${numBarTicks} samples)`;
+
+                ctx.save();
+                ctx.clip();
+                ctx.fillStyle = 'black';
+                ctx.fillText(name, Math.max(x, 0) + 1, y + sh / 2);
+                ctx.restore();
+            }
+        }
+    }
+}
+
+// pixel coordinates to bar coordinates in the levels array
+function xyToBar(x, y) {
+    const i = Math.floor(y / pxPerLevel) + topLevel;
+    const j = binarySearchLevel(x, levels[i]);
+    return {i, j};
+}
+
+// binary search of a block in a stack level
+function binarySearchLevel(x, level) {
+    let i = 0;
+    let j = level.length - 3;
+    while (i <= j) {
+        const m = 3 * ((i / 3 + j / 3) >> 1);
+        const x0 = tickToX(level[m]);
+        const x1 = tickToX(level[m] + level[m + 1]);
+        if (x0 <= x && x1 >= x) {
+            return x1 - x0 > collapseThreshold ? m : -1;
+        }
+        if (x0 > x) {
+            j = m - 3;
+        } else {
+            i = m + 3;
+        }
+    }
+    return -1;
+}
+
+if (window.orientation === undefined) {
+    canvas.onmousemove = addHover;
+    canvas.onmouseout = window.onscroll = removeHover;
+}
+
+function removeHover() {
+    canvas.style.cursor = '';
+    highlightEl.style.display = 'none';
+    tooltipEl.style.display = 'none';
+}
+
+function addHover(e) {
+    const {i, j} = xyToBar(e.offsetX, e.offsetY);
+
+    if (j === -1 || e.offsetX < 0 || e.offsetX > graphWidth) {
+        removeHover();
+        return;
+    }
+
+    canvas.style.cursor = 'pointer';
+
+    const level = levels[i];
+    const x = tickToX(level[j]);
+    const y = (i - topLevel) * pxPerLevel;
+    const sw = tickToX(level[j] + level[j + 1]) - x;
+
+    highlightEl.style.display = 'block';
+    highlightEl.style.left = x + 'px';
+    highlightEl.style.top = (canvas.offsetTop + y) + 'px';
+    highlightEl.style.width = sw + 'px';
+
+    const numBarTicks = level[j + 1];
+    const percent = Math.round(10000 * numBarTicks / numTicks) / 100;
+    const time = `<span class="time">(${percent}%, ${numBarTicks} samples)</span>`;
+    let content = names[level[j + 2]];
+    if (content[0] !== '(') content = content.replace(' ', ` ${time}<br><span class="path">`) + '</span>';
+    else content += ` ${time}`;
+
+    tooltipEl.innerHTML = content;
+    tooltipEl.style.display = 'block';
+    tooltipEl.style.left = (Math.min(e.offsetX + 15 + tooltipEl.clientWidth, graphWidth) - tooltipEl.clientWidth) + 'px';
+    tooltipEl.style.top = (canvas.offsetTop + e.offsetY + 12) + 'px';
+}
+
+// (function frame() { if (levels) render(); requestAnimationFrame(frame); })();
+
+
+</script>
+</body>
+</html>
