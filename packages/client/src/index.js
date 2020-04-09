@@ -1,17 +1,15 @@
-const { S3Client } = require("./S3Client");
-const { CreateBucketCommand } = require("./CreateBucketCommand");
-const { HeadBucketCommand } = require("./HeadBucketCommand");
-const { PutObjectCommand } = require("./PutObjectCommand");
-const { ListObjectsCommand } = require("./ListObjectsCommand");
-const { DeleteObjectCommand } = require("./DeleteObjectCommand");
-const { DeleteBucketCommand } = require("./DeleteBucketCommand");
+const { DynamoDBClient } = require("./DynamoDBClient");
+const { CreateTableCommand } = require("./CreateTableCommand");
+const { PutItemCommand } = require("./PutItemCommand");
+const { DeleteItemCommand } = require("./DeleteItemCommand");
+const { DeleteTableCommand } = require("./DeleteTableCommand");
+const { waitForTableExists } = require("./waitForTableExists");
 
 module.exports = {
-  S3Client,
-  CreateBucketCommand,
-  HeadBucketCommand,
-  PutObjectCommand,
-  ListObjectsCommand,
-  DeleteObjectCommand,
-  DeleteBucketCommand,
+  DynamoDBClient,
+  CreateTableCommand,
+  PutItemCommand,
+  DeleteItemCommand,
+  DeleteTableCommand,
+  waitForTableExists,
 };

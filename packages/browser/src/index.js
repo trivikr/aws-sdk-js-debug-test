@@ -7,13 +7,27 @@ const {
   waitForTableExists,
 } = require("@aws-sdk-debug/client");
 
+const {
+  fromCognitoIdentityPool,
+} = require("@aws-sdk/credential-provider-cognito-identity");
+const { CognitoIdentityClient } = require("@aws-sdk/client-cognito-identity");
+
 (async () => {
   const region = "us-west-2";
+  const identityPoolId = "IDENTITY_POOL_ID";
 
   const TableName = `test-table-${Math.ceil(Math.random() * 10 ** 10)}`;
   const itemDetails = { id: { S: "id" } };
 
-  const client = DynamoDBClient({ region });
+  const client = DynamoDBClient({
+    region,
+    credentials: fromCognitoIdentityPool({
+      client: new CognitoIdentityClient({
+        region,
+      }),
+      identityPoolId,
+    }),
+  });
   await client.send(
     CreateTableCommand({
       TableName,

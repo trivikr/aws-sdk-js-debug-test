@@ -10,12 +10,12 @@
 
   </details>
 
-- Run `DEBUG=aws:sdk:js:s3:PutObjectCommand node index.js` to log debug statements in PutObjectCommand
+- Run `DEBUG=aws:sdk:js:dynamodb:CreateTableCommand node index.js` to log debug statements in CreateTableCommand
 
   <details>
   <summary>Screenshot</summary>
 
-  <img src="./images/node-debug-aws-PutObjectCommand.png" />
+  <img src="./images/node-debug-aws-CreateTableCommand.png" />
 
   </details>
 
@@ -26,13 +26,14 @@
 
   ```console
   $ DEBUG=aws:* node -r pino-debug index.js
-  {"level":20,"time":1586383788192,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:S3Client","region":"us-west-2","v":1}
-  {"level":20,"time":1586383788194,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:CreateBucketCommand","Bucket":"test-bucket-5429254215","v":1}
-  {"level":20,"time":1586383789133,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:HeadBucketCommand","Bucket":"test-bucket-5429254215","v":1}
-  {"level":20,"time":1586383789284,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:PutObjectCommand","Bucket":"test-bucket-5429254215","Key":"test-object","Body":"000000","v":1}
-  {"level":20,"time":1586383789333,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:ListObjectsCommand","Bucket":"test-bucket-5429254215","v":1}
-  {"level":20,"time":1586383789444,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:DeleteObjectCommand","Bucket":"test-bucket-5429254215","Key":"test-object","v":1}
-  {"level":20,"time":1586383789474,"pid":75682,"hostname":"186590ce2139","ns":"aws:sdk:js:s3:DeleteBucketCommand","Bucket":"test-bucket-5429254215","v":1}
+  {"level":20,"time":1586410354379,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DynamoDBClient","region":"us-west-2","v":1}
+  {"level":20,"time":1586410354381,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:CreateTableCommand","TableName":"test-table-5845865874","AttributeDefinitions":[{"AttributeName":"id","AttributeType":"S"}],"KeySchema":[{"AttributeName":"id","KeyType":"HASH"}],"BillingMode":"PAY_PER_REQUEST","v":1}
+  {"level":20,"time":1586410354505,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DescribeTableCommand","TableName":"test-table-5845865874","v":1}
+  {"level":20,"time":1586410359532,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DescribeTableCommand","TableName":"test-table-5845865874","v":1}
+  {"level":20,"time":1586410364576,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DescribeTableCommand","TableName":"test-table-5845865874","v":1}
+  {"level":20,"time":1586410364596,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:PutItemCommand","TableName":"test-table-5845865874","Item":{"id":{"S":"id"}},"v":1}
+  {"level":20,"time":1586410364619,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DeleteItemCommand","TableName":"test-table-5845865874","Key":{"id":{"S":"id"}},"v":1}
+  {"level":20,"time":1586410364664,"pid":65184,"hostname":"186590ce2139","ns":"aws:sdk:js:dynamodb:DeleteTableCommand","TableName":"test-table-5845865874","v":1}
   ```
 
   </details>
@@ -44,30 +45,50 @@
 
   ```console
   $ DEBUG=aws:* node -r pino-debug index.js | pino-pretty -t
-  [2020-04-08 22:09:58.137 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:S3Client"
+  [2020-04-09 05:33:12.378 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:DynamoDBClient"
       region: "us-west-2"
-  [2020-04-08 22:09:58.139 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:CreateBucketCommand"
-      Bucket: "test-bucket-5004196652"
-  [2020-04-08 22:09:58.998 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:HeadBucketCommand"
-      Bucket: "test-bucket-5004196652"
-  [2020-04-08 22:09:59.097 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:PutObjectCommand"
-      Bucket: "test-bucket-5004196652"
-      Key: "test-object"
-      Body: "000000"
-  [2020-04-08 22:09:59.146 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:ListObjectsCommand"
-      Bucket: "test-bucket-5004196652"
-  [2020-04-08 22:09:59.260 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:DeleteObjectCommand"
-      Bucket: "test-bucket-5004196652"
-      Key: "test-object"
-  [2020-04-08 22:09:59.291 +0000] DEBUG (75692 on 186590ce2139):
-      ns: "aws:sdk:js:s3:DeleteBucketCommand"
-      Bucket: "test-bucket-5004196652"
+  [2020-04-09 05:33:12.380 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:CreateTableCommand"
+      TableName: "test-table-4551540763"
+      AttributeDefinitions: [
+        {
+          "AttributeName": "id",
+          "AttributeType": "S"
+        }
+      ]
+      KeySchema: [
+        {
+          "AttributeName": "id",
+          "KeyType": "HASH"
+        }
+      ]
+      BillingMode: "PAY_PER_REQUEST"
+  [2020-04-09 05:33:12.554 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:DescribeTableCommand"
+      TableName: "test-table-4551540763"
+  [2020-04-09 05:33:17.593 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:DescribeTableCommand"
+      TableName: "test-table-4551540763"
+  [2020-04-09 05:33:17.632 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:PutItemCommand"
+      TableName: "test-table-4551540763"
+      Item: {
+        "id": {
+          "S": "id"
+        }
+      }
+  [2020-04-09 05:33:17.658 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:DeleteItemCommand"
+      TableName: "test-table-4551540763"
+      Key: {
+        "id": {
+          "S": "id"
+        }
+      }
+  [2020-04-09 05:33:17.694 +0000] DEBUG (65238 on 186590ce2139):
+      ns: "aws:sdk:js:dynamodb:DeleteTableCommand"
+      TableName: "test-table-4551540763"
   ```
 
   </details>
@@ -83,4 +104,4 @@
   ```console
   $ node --prof-process --preprocess -j isolate*.log | flamebearer
   ```
-- [An Example flamegraph](./flamegraph.html) - the debug module takes aroudn 3% of the time
+- [An Example flamegraph](./flamegraph.html) - the debug module takes aroudn 4% of the time

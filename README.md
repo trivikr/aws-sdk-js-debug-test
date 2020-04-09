@@ -9,4 +9,8 @@ Testing debug module with AWS JavaScript SDK v3
 
 ### In Node.js
 
-Visit [README.md](./packages/node/README.md)
+Visit [Node.js README.md](./packages/node/README.md)
+
+### In browser
+
+Visit [browser README.md](./packages/browser/README.md)
