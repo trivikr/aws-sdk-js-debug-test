@@ -10,6 +10,30 @@
 
   </details>
 
+- When stdout is not a TTY, `Date#toISOString()` will emit date information
+
+  <details>
+  <summary>Output</summary>
+
+  ```console
+  $ DEBUG=aws:* node index.js 2>&1 | cat
+  2020-04-09T15:34:24.635Z aws:sdk:js:dynamodb:DynamoDBClient { region: 'us-west-2' }
+  2020-04-09T15:34:24.637Z aws:sdk:js:dynamodb:CreateTableCommand {
+    TableName: 'test-table-610375182',
+    AttributeDefinitions: [ { AttributeName: 'id', AttributeType: 'S' } ],
+    KeySchema: [ { AttributeName: 'id', KeyType: 'HASH' } ],
+    BillingMode: 'PAY_PER_REQUEST'
+  }
+  2020-04-09T15:34:24.761Z aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-610375182' }
+  2020-04-09T15:34:29.786Z aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-610375182' }
+  2020-04-09T15:34:34.824Z aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-610375182' }
+  2020-04-09T15:34:34.847Z aws:sdk:js:dynamodb:PutItemCommand { TableName: 'test-table-610375182', Item: { id: { S: 'id' } } }
+  2020-04-09T15:34:34.870Z aws:sdk:js:dynamodb:DeleteItemCommand { TableName: 'test-table-610375182', Key: { id: { S: 'id' } } }
+  2020-04-09T15:34:34.893Z aws:sdk:js:dynamodb:DeleteTableCommand { TableName: 'test-table-610375182' }
+  ```
+
+  </details>
+
 - Run `DEBUG=aws:sdk:js:dynamodb:CreateTableCommand node index.js` to log debug statements in CreateTableCommand
 
   <details>
