@@ -34,6 +34,30 @@
 
   </details>
 
+- Object insepction depth can be passed by using `DEBUG_DEPTH` environment variable
+
+  <details>
+  <summary>Output</summary>
+
+  ```console
+  $ DEBUG=aws:* DEBUG_DEPTH=0 node index.js
+  aws:sdk:js:dynamodb:DynamoDBClient { region: 'us-west-2' } +0ms
+  aws:sdk:js:dynamodb:CreateTableCommand {
+  aws:sdk:js:dynamodb:CreateTableCommand   TableName: 'test-table-5730644464',
+  aws:sdk:js:dynamodb:CreateTableCommand   AttributeDefinitions: [Array],
+  aws:sdk:js:dynamodb:CreateTableCommand   KeySchema: [Array],
+  aws:sdk:js:dynamodb:CreateTableCommand   BillingMode: 'PAY_PER_REQUEST'
+  aws:sdk:js:dynamodb:CreateTableCommand } +0ms
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-5730644464' } +0ms
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-5730644464' } +5s
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-5730644464' } +5s
+  aws:sdk:js:dynamodb:PutItemCommand { TableName: 'test-table-5730644464', Item: [Object] } +0ms
+  aws:sdk:js:dynamodb:DeleteItemCommand { TableName: 'test-table-5730644464', Key: [Object] } +0ms
+  aws:sdk:js:dynamodb:DeleteTableCommand { TableName: 'test-table-5730644464' } +0ms
+  ```
+
+  </details>
+
 - Run `DEBUG=aws:sdk:js:dynamodb:CreateTableCommand node index.js` to log debug statements in CreateTableCommand
 
   <details>
