@@ -58,6 +58,30 @@
 
   </details>
 
+- Hidden properties on inspected objects can be viewed using `DEBUG_SHOW_HIDDEN` environment variable
+
+  <details>
+  <summary>Output</summary>
+
+  ```console
+  $ DEBUG=aws:* DEBUG_SHOW_HIDDEN=1 node index.js
+  aws:sdk:js:dynamodb:DynamoDBClient { region: 'us-west-2' } +0ms
+  aws:sdk:js:dynamodb:CreateTableCommand {
+  aws:sdk:js:dynamodb:CreateTableCommand   TableName: 'test-table-4872957147',
+  aws:sdk:js:dynamodb:CreateTableCommand   AttributeDefinitions: [ { AttributeName: 'id', AttributeType: 'S' }, [length]: 1 ],
+  aws:sdk:js:dynamodb:CreateTableCommand   KeySchema: [ { AttributeName: 'id', KeyType: 'HASH' }, [length]: 1 ],
+  aws:sdk:js:dynamodb:CreateTableCommand   BillingMode: 'PAY_PER_REQUEST'
+  aws:sdk:js:dynamodb:CreateTableCommand } +0ms
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-4872957147' } +0ms
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-4872957147' } +5s
+  aws:sdk:js:dynamodb:DescribeTableCommand { TableName: 'test-table-4872957147' } +5s
+  aws:sdk:js:dynamodb:PutItemCommand { TableName: 'test-table-4872957147', Item: { id: { S: 'id' } } } +0ms
+  aws:sdk:js:dynamodb:DeleteItemCommand { TableName: 'test-table-4872957147', Key: { id: { S: 'id' } } } +0ms
+  aws:sdk:js:dynamodb:DeleteTableCommand { TableName: 'test-table-4872957147' } +0ms
+  ```
+
+  </details>
+
 - Run `DEBUG=aws:sdk:js:dynamodb:CreateTableCommand node index.js` to log debug statements in CreateTableCommand
 
   <details>
